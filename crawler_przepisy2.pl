@@ -36,6 +36,15 @@ my $i = $od;
 my $json = JSON->new;
 
 my @api_keys = (
+	'dvx5Y9WGhZAlE746lQj6ccD9r7n4uHQ8',
+	'dvx8lH0Ylig3BcM1SQ1dE9k72U39DOPO',
+	'dvxCtQvp0sm5BE5U7eTTq491p8Mvn9OU',
+	'dvxu5AVr2p0cJOxU69M7nWdHs250PEP9',
+	'dvxV0Jrku0SC3n9vyy829rKv8Ech1MUu',
+	'dvx8nQ6YDuJ90ULzs3555q7S7ddl6XR8',
+	'dvxRMBQ1mz4F8b70ymL2wY3S5Q7tc6oK',
+	'dvxwFb1cl7TKa6Epu42plyn7jUS12DaV',
+	'dvxsC81Gh4w65FALdMfa179rs5Vni7cP',
 	'dvxgq38c2yR4Cm35r7WN3XhpII8A7PLS',
 	'dvxZTjv1008Q8PmW9K1H54M65Ob3V0nF',
 	'dvxNGs1U4Gpj9ivFO8Lv9et8GDbaGQ22',
