@@ -19,7 +19,7 @@ def getwords(docname):
 
 def category(name):
     """Zwraca liste etykiet kategorii."""
-    name = name.split("/")[1]
+    name = name.split("/")[0] # 1 powoduje list index out of range
     idx_cat_time = name.split('-_')
     idx = idx_cat_time[0]
     cat_time = idx_cat_time[1].split('^')
@@ -33,6 +33,38 @@ def category(name):
 
     return cat_list
 
+def readFeatureCount():
+    alreadyDoneFeatureCount = {};
+    args = ()
+    try:
+        f = open("feature_count.txt", "r")
+        try:
+            allLines = f.readlines()
+        finally:
+            f.close()
+    except IOError:
+        pass
+    for line in allLines:
+        sp = line.split(";")
+        args = (sp[0], sp[1])
+        alreadyDoneFeatureCount[args] = int(sp[2])	
+    return alreadyDoneFeatureCount;
+	
+def readClassCount():
+    alreadyDoneClassCount = {};
+    try:
+        f = open("class_count.txt", "r")
+        try:
+            allLines = f.readlines()
+        finally:
+            f.close()
+    except IOError:
+        pass
+    for line in allLines:
+        sp = line.split(";")
+        alreadyDoneClassCount[sp[0]] = int(sp[1])	
+    return alreadyDoneClassCount;
+	
 def cross_eval(directory, parts, verbose=False):
     """Dokonuje sprawdzenia krzyżowego."""
     correct = 0
@@ -45,27 +77,52 @@ def cross_eval(directory, parts, verbose=False):
     trainlist.extend(glob.glob("recipies/*"))
         
     classifier = NaiveBayes.NaiveBayes(getwords)
+    classifier.feature_count = readFeatureCount() #wczytuje z pliku dane z wczesniejszego trenowania
+    classifier.class_count = readClassCount()
 
     if verbose:
-        print  "\tTraining classifier"
+        print  ("\tTraining classifier")
     for doc in trainlist:
         categories = category(doc)
         for cat in categories:
             train(classifier, doc, cat)
-    
+#--------------------------------------------------------------------------------------------
+    try:
+     #Otwiera plik istniejący lub tworzy nowy i zapisuje do niego feature_count.
+        resultsFile = open("feature_count.txt", "w")
+        try:
+            for feat in classifier.feature_count:
+                string = feat[0]+";"+feat[1]+";"+str(classifier.feature_count[(feat[0], feat[1])])+"\n"
+                resultsFile.write(string)
+        finally:
+            resultsFile.close()
+    except IOError:
+        pass
+
+    try:
+        resultsFile2 = open("class_count.txt", "w") #zapisuje class_count do pliku
+        try:
+            for cl in classifier.class_count:
+                string = cl+";"+str(classifier.class_count[cl])+"\n"
+                resultsFile2.write(string)
+        finally:
+            resultsFile2.close()
+    except IOError:
+        pass
+#---------------------------------------------------------------------------------------------		
     if verbose:
-        print "\tClassifying"
+        print ("\tClassifying")
     for doc in testlist:
         bestcats = classify(classifier, doc)
         if verbose:
-            print "\t", doc, ":", bestcats, "-",
+            print ("\t", doc, ":", bestcats, "-"),
         cats_count = len(bestcats)
         correct_count = 0
         for cat in category(doc):
             for bestcat in bestcats:
                 if bestcat == cat:
                     correct_count += 1
-        print correct_count, '/', cats_count
+        print (correct_count, '/', cats_count)
         correct += correct_count
         total += cats_count
 
@@ -73,4 +130,4 @@ def cross_eval(directory, parts, verbose=False):
 
 if __name__ == '__main__':
     ACCURACY = cross_eval("mailbox", 10, True)
-    print "Accuracy:", ACCURACY
+    print ("Accuracy:", ACCURACY)

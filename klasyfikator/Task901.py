@@ -7,3 +7,4 @@ def train (bayes, item, cat):
         if (word,cat) not in bayes.feature_count:
             bayes.feature_count [(word, cat)] = 0
         bayes.feature_count[(word, cat)] += 1
+    return bayes
