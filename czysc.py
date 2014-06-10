@@ -43,9 +43,11 @@ for doc in testlist:
 			linia=re.sub(' sodium ',' ',linia)
 			linia=re.sub(' mmmmm ',' ',linia)
 			linia=re.sub(' kcal ',' ',linia)
+			linia=re.sub('[0-9]',' ',linia)
 			slowa = linia.split(' ')
 			for slowo in slowa:
-				words.append(slowo)
+				slowo_bez_inter=slowo.strip(string.punctuation)
+				words.append(slowo_bez_inter)
 	file.close()
 	file1=open(doc,'w+')
 	for word in words:
