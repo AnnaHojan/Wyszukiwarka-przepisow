@@ -19,7 +19,7 @@ def getwords(docname):
 
 def category(name):
     """Zwraca liste etykiet kategorii."""
-    name = name.split("/")[1]
+    name = name.split("/")[0]
     idx_cat_time = name.split('-_')
     idx = idx_cat_time[0]
     cat_time = idx_cat_time[1].split('^')
@@ -59,7 +59,7 @@ def cross_eval(directory, parts, verbose=False):
         bestcats = classify(classifier, doc)
         if verbose:
             print "\t", doc, ":", bestcats, "-",
-        cats_count = len(bestcats)
+        cats_count = 2
         correct_count = 0
         for cat in category(doc):
             for bestcat in bestcats:
