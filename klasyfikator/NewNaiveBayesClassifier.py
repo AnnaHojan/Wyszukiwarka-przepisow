@@ -68,9 +68,41 @@ def cross_eval(directory, parts, verbose=False):
         print correct_count, '/', cats_count
         correct += correct_count
         total += cats_count
+    
+    three_bests = get_three_bests(classifier)
+    print three_bests
+    baseline(three_bests,testlist,verbose)
+   
+    ACCURACY = float(correct)/float(total)
+    print "Accuracy:", ACCURACY
 
-    return float(correct)/float(total)
+# podaj trzy najczestsze kategorie
+def get_three_bests(classifier):
+    #print classifier.class_count
+    classes_sorted = sorted(classifier.class_count, key=classifier.class_count.get, reverse=True)
+    return classes_sorted[:3]
+# baseline
+def baseline(three_bests,testlist,verbose):
+    correct = 0
+    total = 0
+    for doc in testlist:
+        #if verbose:
+            #print "\t", doc, ":", three_bests, "-",
+        cats_count = 2
+        correct_count = 0
+        for cat in category(doc):
+            for bestcat in three_bests:
+                if bestcat == cat:
+                    correct_count += 1
+        #print correct_count, '/', cats_count
+        correct += correct_count
+        total += cats_count
+        
+    ACCURACY = float(correct)/float(total)
+    print "Base line accuracy:", ACCURACY
+    
+
 
 if __name__ == '__main__':
-    ACCURACY = cross_eval("mailbox", 10, True)
-    print "Accuracy:", ACCURACY
+     cross_eval("mailbox", 10, True)
+    
