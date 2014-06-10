@@ -28,7 +28,7 @@ def category(name):
     cat_list = cat.split("_")
 
     #print idx
-    #print time   
+    #print time
     #print cat_list
 
     return cat_list
@@ -44,12 +44,13 @@ def readFeatureCount():
             f.close()
     except IOError:
         pass
-    for line in allLines:
-        sp = line.split(";")
-        args = (sp[0], sp[1])
-        alreadyDoneFeatureCount[args] = int(sp[2])	
+    else:
+        for line in allLines:
+            sp = line.split(";")
+            args = (sp[0], sp[1])
+            alreadyDoneFeatureCount[args] = int(sp[2])	
     return alreadyDoneFeatureCount;
-	
+
 def readClassCount():
     alreadyDoneClassCount = {};
     try:
@@ -60,11 +61,12 @@ def readClassCount():
             f.close()
     except IOError:
         pass
-    for line in allLines:
-        sp = line.split(";")
-        alreadyDoneClassCount[sp[0]] = int(sp[1])	
+    else:
+        for line in allLines:
+            sp = line.split(";")
+            alreadyDoneClassCount[sp[0]] = int(sp[1])	
     return alreadyDoneClassCount;
-	
+
 def cross_eval(directory, parts, verbose=False):
     """Dokonuje sprawdzenia krzyżowego."""
     correct = 0
@@ -73,7 +75,7 @@ def cross_eval(directory, parts, verbose=False):
     testlist = []
     trainlist = []
         
-    testlist.extend(glob.glob("recipiestest/*"))              
+    testlist.extend(glob.glob("recipiestest/*"))
     trainlist.extend(glob.glob("recipies/*"))
         
     classifier = NaiveBayes.NaiveBayes(getwords)
@@ -81,7 +83,7 @@ def cross_eval(directory, parts, verbose=False):
     classifier.class_count = readClassCount()
 
     if verbose:
-        print  ("\tTraining classifier")
+        print ("\tTraining classifier")
     for doc in trainlist:
         categories = category(doc)
         for cat in categories:
@@ -109,14 +111,14 @@ def cross_eval(directory, parts, verbose=False):
             resultsFile2.close()
     except IOError:
         pass
-#---------------------------------------------------------------------------------------------		
+#---------------------------------------------------------------------------------------------
     if verbose:
         print ("\tClassifying")
     for doc in testlist:
         bestcats = classify(classifier, doc)
         if verbose:
             print ("\t", doc, ":", bestcats, "-"),
-        cats_count = len(bestcats)
+        cats_count = 2
         correct_count = 0
         for cat in category(doc):
             for bestcat in bestcats:
@@ -126,7 +128,37 @@ def cross_eval(directory, parts, verbose=False):
         correct += correct_count
         total += cats_count
 
+    three_bests = get_three_bests(classifier)
+    print three_bests
+    baseline(three_bests,testlist,verbose)
+
     return float(correct)/float(total)
+
+# podaj trzy najczestsze kategorie
+def get_three_bests(classifier):
+    #print classifier.class_count
+    classes_sorted = sorted(classifier.class_count, key=classifier.class_count.get, reverse=True)
+    return classes_sorted[:3]
+# baseline
+def baseline(three_bests,testlist,verbose):
+    correct = 0
+    total = 0
+    for doc in testlist:
+        #if verbose:
+            #print "\t", doc, ":", three_bests, "-",
+        cats_count = 2
+        correct_count = 0
+        for cat in category(doc):
+            for bestcat in three_bests:
+                if bestcat == cat:
+                    correct_count += 1
+        #print correct_count, '/', cats_count
+        correct += correct_count
+        total += cats_count
+        
+    ACCURACY = float(correct)/float(total)
+    print "Base line accuracy:", ACCURACY
+    
 
 if __name__ == '__main__':
     ACCURACY = cross_eval("mailbox", 10, True)
