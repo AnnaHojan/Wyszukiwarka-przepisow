@@ -10,6 +10,39 @@ import NaiveBayes
 from Task901 import train
 from Task905 import classify
 
+def readFeatureCount():
+    alreadyDoneFeatureCount = {};
+    args = ()
+    try:
+        f = open("feature_count.txt", "r")
+        try:
+            allLines = f.readlines()
+            for line in allLines:
+                sp = line.split(";")
+                args = (sp[0], sp[1])
+                alreadyDoneFeatureCount[args] = int(sp[2])	
+        finally:
+            f.close()
+    except IOError:
+        pass
+    
+    return alreadyDoneFeatureCount;
+	
+def readClassCount():
+    alreadyDoneClassCount = {};
+    try:
+        f = open("class_count.txt", "r")
+        try:
+            allLines = f.readlines()
+            for line in allLines:
+                sp = line.split(";")
+                alreadyDoneClassCount[sp[0]] = int(sp[1])
+        finally:
+            f.close()
+    except IOError:
+        pass	
+    return alreadyDoneClassCount;
+
 def getwords(docname):
     """Wyznacza zbiór cech (słów)."""
     doc = open(docname).read()
@@ -45,6 +78,8 @@ def cross_eval(directory, parts, verbose=False):
     trainlist.extend(glob.glob("recipies/*"))
         
     classifier = NaiveBayes.NaiveBayes(getwords)
+    classifier.feature_count = readFeatureCount() #wczytuje z pliku dane z wczesniejszego trenowania
+    classifier.class_count = readClassCount()
 
     if verbose:
         print  "\tTraining classifier"
@@ -53,6 +88,29 @@ def cross_eval(directory, parts, verbose=False):
         for cat in categories:
             train(classifier, doc, cat)
     
+    try:
+     #Otwiera plik istniejący lub tworzy nowy i zapisuje do niego feature_count.
+        resultsFile = open("feature_count.txt", "w")
+        try:
+            for feat in classifier.feature_count:
+                string = feat[0]+";"+feat[1]+";"+str(classifier.feature_count[(feat[0], feat[1])])+"\n"
+                resultsFile.write(string)
+        finally:
+            resultsFile.close()
+    except IOError:
+        pass
+
+    try:
+        resultsFile2 = open("class_count.txt", "w") #zapisuje class_count do pliku
+        try:
+            for cl in classifier.class_count:
+                string = cl+";"+str(classifier.class_count[cl])+"\n"
+                resultsFile2.write(string)
+        finally:
+            resultsFile2.close()
+    except IOError:
+        pass
+	
     if verbose:
         print "\tClassifying"
     for doc in testlist:
